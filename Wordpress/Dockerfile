@@ -8,8 +8,20 @@ RUN set -eux; \
 	apt-get install -y --no-install-recommends \
 # Ghostscript is required for rendering PDF previews
 		ghostscript \
+# AWS CLI dependencies
+		curl \
+		unzip \
+		groff \
+		less \
 	; \
 	rm -rf /var/lib/apt/lists/*
+
+# Install AWS CLI v2
+RUN set -eux; \
+	curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+	unzip awscliv2.zip; \
+	./aws/install; \
+	rm -rf aws awscliv2.zip
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN set -ex; \
@@ -155,6 +167,13 @@ RUN set -eux; \
 	done; \
 	chown -R www-data:www-data wp-content; \
 	chmod -R 1777 wp-content
+
+# Install SAML 2.0 plugin
+RUN set -eux; \
+	curl -o saml-20-single-sign-on.zip -fL "https://downloads.wordpress.org/plugin/saml-20-single-sign-on.latest-stable.zip"; \
+	unzip saml-20-single-sign-on.zip -d /usr/src/wordpress/wp-content/plugins/; \
+	rm saml-20-single-sign-on.zip; \
+	chown -R www-data:www-data /usr/src/wordpress/wp-content/plugins/saml-20-single-sign-on
 
 VOLUME /var/www/html
 
