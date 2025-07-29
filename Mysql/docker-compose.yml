@@ -1,0 +1,25 @@
+# Wordpress image for Testops Factory
+services:
+
+  db_testopsfactory:
+    build:
+      context: ./8.0
+      dockerfile: ./Dockerfile
+    ports:
+      - "3306:3306"
+
+    container_name: db_testopsfactory
+    restart: always
+    env_file:
+      - ./.env
+
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_volume_testopsfactory:/var/lib/mysql
+
+volumes:
+  db_volume_testopsfactory:
