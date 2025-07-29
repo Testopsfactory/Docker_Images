@@ -1,13 +1,14 @@
 # Wordpress image for Testops Factory
 services:
-
   wordpress_testopsfactory:
-    build: .
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     restart: always
     ports:
       - "8080:80"
     env_file:
-      - .env
+      - ../.env
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
@@ -15,22 +16,6 @@ services:
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
     volumes:
       - wordpress_volume_testopsfactory:/var/www/html
-    depends_on:
-      - db_testopsfactory
-
-  db_testopsfactory:
-    image: mysql:5.7
-    restart: always
-    env_file:
-      - .env
-    environment:
-      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
-      MYSQL_USER: ${WORDPRESS_DB_USER}
-      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - db_volume_testopsfactory:/var/lib/mysql
 
 volumes:
   wordpress_volume_testopsfactory:
-  db_volume_testopsfactory:
