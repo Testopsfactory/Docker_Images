@@ -11,7 +11,7 @@ services:
     container_name: db_testopsfactory
     restart: always
     env_file:
-      - ../.env
+      - ./.env
 
     environment:
       MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
