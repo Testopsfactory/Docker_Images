@@ -1,6 +1,21 @@
 # Wordpress image for Testops Factory
 services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME}
+      MYSQL_USER: ${WORDPRESS_DB_USER}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    volumes:
+      - mysql_volume_testopsfactory:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
   wordpress_testopsfactory:
+    depends_on:
+      - db
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -14,8 +29,26 @@ services:
       WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      # Headless WordPress Configuration
+      GRAPHQL_JWT_AUTH_SECRET_KEY: ${GRAPHQL_JWT_AUTH_SECRET_KEY}
+      JWT_AUTH_SECRET_KEY: ${JWT_AUTH_SECRET_KEY}
+      DISABLE_WP_CRON: ${DISABLE_WP_CRON:-false}
+      WP_POST_REVISIONS: ${WP_POST_REVISIONS:-3}
+      AUTOSAVE_INTERVAL: ${AUTOSAVE_INTERVAL:-300}
+      # WordPress Multisite Configuration (managed by wp-config.php via WP-CLI)
+      # WORDPRESS_CONFIG_EXTRA: |
+      #   /* Multisite Configuration for Development */
+      #   define('WP_ALLOW_MULTISITE', true);
+      #   define('MULTISITE', true);
+      #   define('SUBDOMAIN_INSTALL', true);
+      #   define('DOMAIN_CURRENT_SITE', '${DOMAIN_CURRENT_SITE:-localhost}');
+      #   define('PATH_CURRENT_SITE', '/');
+      #   define('SITE_ID_CURRENT_SITE', 1);
+      #   define('BLOG_ID_CURRENT_SITE', 1);
+      #   define('SUNRISE', 'on');
     volumes:
       - wordpress_volume_testopsfactory:/var/www/html
 
 volumes:
   wordpress_volume_testopsfactory:
+  mysql_volume_testopsfactory:

@@ -175,6 +175,34 @@ RUN set -eux; \
 	rm saml-20-single-sign-on.zip; \
 	chown -R www-data:www-data /usr/src/wordpress/wp-content/plugins/saml-20-single-sign-on
 
+# Install WPGraphQL plugin for headless functionality
+RUN set -eux; \
+	curl -o wp-graphql.zip -fL "https://downloads.wordpress.org/plugin/wp-graphql.latest-stable.zip"; \
+	unzip wp-graphql.zip -d /usr/src/wordpress/wp-content/plugins/; \
+	rm wp-graphql.zip; \
+	chown -R www-data:www-data /usr/src/wordpress/wp-content/plugins/wp-graphql
+
+# Install WPGraphQL JWT Authentication plugin (using WordPress repository)
+RUN set -eux; \
+	curl -o wp-jwt-authentication-for-wp-rest-api.zip -fL "https://downloads.wordpress.org/plugin/jwt-authentication-for-wp-rest-api.latest-stable.zip"; \
+	unzip wp-jwt-authentication-for-wp-rest-api.zip -d /usr/src/wordpress/wp-content/plugins/; \
+	rm wp-jwt-authentication-for-wp-rest-api.zip; \
+	chown -R www-data:www-data /usr/src/wordpress/wp-content/plugins/jwt-authentication-for-wp-rest-api
+
+# Install WPGraphQL CORS plugin for headless frontend access
+RUN set -eux; \
+	curl -o wp-graphql-cors.zip -fL "https://github.com/funkhaus/wp-graphql-cors/archive/refs/heads/master.zip"; \
+	unzip wp-graphql-cors.zip -d /tmp/; \
+	mv /tmp/wp-graphql-cors-master /usr/src/wordpress/wp-content/plugins/wp-graphql-cors; \
+	rm wp-graphql-cors.zip; \
+	chown -R www-data:www-data /usr/src/wordpress/wp-content/plugins/wp-graphql-cors
+
+# Install WP-CLI for WordPress management
+RUN set -eux; \
+	curl -o /usr/local/bin/wp -fL "https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar"; \
+	chmod +x /usr/local/bin/wp; \
+	wp --info --allow-root
+
 VOLUME /var/www/html
 
 COPY --chown=www-data:www-data wp-config-docker.php /usr/src/wordpress/

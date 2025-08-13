@@ -119,6 +119,27 @@ define( 'WP_DEBUG', !!getenv_docker('WORDPRESS_DEBUG', '') );
 
 /* Add any custom values between this line and the "stop editing" line. */
 
+// WordPress Headless Configuration
+define('GRAPHQL_JWT_AUTH_SECRET_KEY', getenv_docker('GRAPHQL_JWT_AUTH_SECRET_KEY', 'your-secret-key-here-change-this'));
+define('JWT_AUTH_SECRET_KEY', getenv_docker('JWT_AUTH_SECRET_KEY', 'your-jwt-secret-key-here-change-this'));
+define('JWT_AUTH_CORS_ENABLE', true);
+
+// Enable CORS for GraphQL endpoint
+define('GRAPHQL_CORS_ENABLE', true);
+
+// Disable WordPress cron for headless performance
+define('DISABLE_WP_CRON', getenv_docker('DISABLE_WP_CRON', false));
+
+// Enable WordPress REST API
+define('REST_API_ENABLED', true);
+
+// Headless-specific optimizations
+define('WP_POST_REVISIONS', getenv_docker('WP_POST_REVISIONS', 3));
+define('AUTOSAVE_INTERVAL', getenv_docker('AUTOSAVE_INTERVAL', 300));
+
+// WordPress Multisite Network Configuration (already handled by Terraform)
+// These will be set via WORDPRESS_CONFIG_EXTRA in Kubernetes deployment
+
 // If we're behind a proxy server and using HTTPS, we need to alert WordPress of that fact
 // see also https://wordpress.org/support/article/administration-over-ssl/#using-a-reverse-proxy
 if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($_SERVER['HTTP_X_FORWARDED_PROTO'], 'https') !== false) {
@@ -126,27 +147,27 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strpos($_SERVER['HTTP_X_FORWARD
 }
 // (we include this by default because reverse proxying is extremely common in container environments)
 
-// Debug environment variables
+// Debug environment variables (excluding sensitive data)
 if (getenv_docker('WORDPRESS_DEBUG', '') !== '') {
     $env_debug = array(
         'DB_NAME' => DB_NAME,
         'DB_USER' => DB_USER,
-        'DB_PASSWORD' => DB_PASSWORD,
+        'DB_PASSWORD' => '***HIDDEN***',
         'DB_HOST' => DB_HOST,
         'WORDPRESS_DB_NAME' => getenv('WORDPRESS_DB_NAME'),
         'WORDPRESS_DB_USER' => getenv('WORDPRESS_DB_USER'),
-        'WORDPRESS_DB_PASSWORD' => getenv('WORDPRESS_DB_PASSWORD'),
+        'WORDPRESS_DB_PASSWORD' => '***HIDDEN***',
         'WORDPRESS_DB_HOST' => getenv('WORDPRESS_DB_HOST'),
         'ENV_WORDPRESS_DB_NAME' => isset($_ENV['WORDPRESS_DB_NAME']) ? $_ENV['WORDPRESS_DB_NAME'] : 'not set',
         'ENV_WORDPRESS_DB_USER' => isset($_ENV['WORDPRESS_DB_USER']) ? $_ENV['WORDPRESS_DB_USER'] : 'not set',
-        'ENV_WORDPRESS_DB_PASSWORD' => isset($_ENV['WORDPRESS_DB_PASSWORD']) ? $_ENV['WORDPRESS_DB_PASSWORD'] : 'not set',
+        'ENV_WORDPRESS_DB_PASSWORD' => '***HIDDEN***',
         'ENV_WORDPRESS_DB_HOST' => isset($_ENV['WORDPRESS_DB_HOST']) ? $_ENV['WORDPRESS_DB_HOST'] : 'not set',
         'SERVER_WORDPRESS_DB_NAME' => isset($_SERVER['WORDPRESS_DB_NAME']) ? $_SERVER['WORDPRESS_DB_NAME'] : 'not set',
         'SERVER_WORDPRESS_DB_USER' => isset($_SERVER['WORDPRESS_DB_USER']) ? $_SERVER['WORDPRESS_DB_USER'] : 'not set',
-        'SERVER_WORDPRESS_DB_PASSWORD' => isset($_SERVER['WORDPRESS_DB_PASSWORD']) ? $_SERVER['WORDPRESS_DB_PASSWORD'] : 'not set',
+        'SERVER_WORDPRESS_DB_PASSWORD' => '***HIDDEN***',
         'SERVER_WORDPRESS_DB_HOST' => isset($_SERVER['WORDPRESS_DB_HOST']) ? $_SERVER['WORDPRESS_DB_HOST'] : 'not set',
     );
-    error_log('WordPress Environment Variables: ' . print_r($env_debug, true));
+    error_log('WordPress Environment Variables (passwords hidden): ' . print_r($env_debug, true));
 }
 
 if ($configExtra = getenv_docker('WORDPRESS_CONFIG_EXTRA', '')) {
