@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -44,7 +46,7 @@ jobs:
 
       - name: Create .env file for DEV
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           cp .env.example .env
           # Update with test-specific values
           sed -i 's/exampleuser/testuser/g' .env
@@ -55,7 +57,7 @@ jobs:
       - name: Build WordPress DEV Image
         id: build-wordpress
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           docker build -t wordpress-headless-dev:test . --no-cache
         continue-on-error: true
 
@@ -68,7 +70,7 @@ jobs:
       - name: Start Services with Docker Compose
         id: start-services
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           docker-compose up -d
           echo "Waiting for services to be ready..."
           sleep 30
@@ -77,7 +79,7 @@ jobs:
       - name: Check Services Status
         id: check-services
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           docker-compose ps
           
           # Check if containers are running
@@ -114,7 +116,7 @@ jobs:
       - name: Test WordPress Setup and Plugins
         id: test-plugins
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           
           echo "Installing WordPress..."
           docker-compose exec -T wordpress_testopsfactory wp --allow-root core install \
@@ -161,7 +163,7 @@ jobs:
       - name: Collect Service Logs
         if: always()
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           echo "=== WordPress Logs ==="
           docker-compose logs wordpress_testopsfactory --tail=50 || true
           echo "=== MySQL Logs ==="
@@ -170,7 +172,7 @@ jobs:
       - name: Stop Services
         if: always()
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           docker-compose down -v || true
 
       - name: Test Results Summary
@@ -191,13 +193,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build WordPress TEST Image
         run: |
-          cd docker-images/Environments/TEST/Wordpress
+          cd Environments/TEST/Wordpress
           if [ -f "Dockerfile" ]; then
             docker build -t wordpress-headless-test:test . --no-cache
             echo "✅ WordPress TEST image built successfully"
@@ -214,13 +218,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build Image for Security Scan
         run: |
-          cd docker-images/Environments/DEV/Wordpress
+          cd Environments/DEV/Wordpress
           docker build -t wordpress-security-scan:latest . --quiet
 
       - name: Run Trivy vulnerability scanner
@@ -257,11 +263,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Run hadolint Dockerfile linter
         uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: docker-images/Environments/DEV/Wordpress/Dockerfile
+          dockerfile: Environments/DEV/Wordpress/Dockerfile
           format: sarif
           output-file: hadolint-results.sarif
         continue-on-error: true
@@ -276,7 +284,7 @@ jobs:
       - name: Check Dockerfile patterns
         run: |
           echo "=== Dockerfile Validation ==="
-          dockerfile="docker-images/Environments/DEV/Wordpress/Dockerfile"
+          dockerfile="Environments/DEV/Wordpress/Dockerfile"
           
           # Check for security best practices
           if grep -q "USER " "$dockerfile"; then
@@ -306,6 +314,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Generate Test Report
         run: |
